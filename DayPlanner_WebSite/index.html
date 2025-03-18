@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day Planner</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>📅 Day Planner</h1>
+        <div class="input-section">
+            <input type="text" id="task" placeholder="Enter your task...">
+            <input type="time" id="time">
+            <select id="priority">
+                <option value="High">🔥 High</option>
+                <option value="Medium">⚡ Medium</option>
+                <option value="Low">🌱 Low</option>
+            </select>
+            <button onclick="addTask()">➕ Add Task</button>
+        </div>
+        <div class="task-filters">
+            <button onclick="filterTasks('all')">All</button>
+            <button onclick="filterTasks('completed')">Completed</button>
+            <button onclick="filterTasks('pending')">Pending</button>
+        </div>
+        <ul id="taskList"></ul>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", loadTasks);
+
+        function addTask() {
+            let taskInput = document.getElementById("task").value;
+            let timeInput = document.getElementById("time").value;
+            let priority = document.getElementById("priority").value;
+            if (taskInput === "" || timeInput === "") return;
+
+            let task = { text: taskInput, time: timeInput, priority: priority, completed: false };
+            let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+            tasks.push(task);
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+            renderTasks();
+        }
+
+        function renderTasks(filter = 'all') {
+            let taskList = document.getElementById("taskList");
+            taskList.innerHTML = "";
+            let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+
+            tasks.forEach((task, index) => {
+                if (filter === 'completed' && !task.completed) return;
+                if (filter === 'pending' && task.completed) return;
+                
+                let li = document.createElement("li");
+                li.innerHTML = `<span class="${task.completed ? 'completed' : ''}">${task.time} - ${task.text} <span class="priority ${task.priority.toLowerCase()}">${task.priority}</span></span>
+                                <button onclick="toggleComplete(${index})">✔</button>
+                                <button onclick="deleteTask(${index})">❌</button>`;
+                taskList.appendChild(li);
+            });
+        }
+
+        function toggleComplete(index) {
+            let tasks = JSON.parse(localStorage.getItem("tasks"));
+            tasks[index].completed = !tasks[index].completed;
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+            renderTasks();
+        }
+
+        function deleteTask(index) {
+            let tasks = JSON.parse(localStorage.getItem("tasks"));
+            tasks.splice(index, 1);
+            localStorage.setItem("tasks", JSON.stringify(tasks));
+            renderTasks();
+        }
+
+        function filterTasks(filter) {
+            renderTasks(filter);
+        }
+
+        function loadTasks() {
+            renderTasks();
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            width: 400px;
+            text-align: center;
+            color: black;
+        }
+        .input-section {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        input, select, button {
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+        }
+        button {
+            cursor: pointer;
+            background: #4CAF50;
+            color: white;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .task-filters button {
+            background: #007BFF;
+            margin: 5px;
+        }
+        .task-filters button:hover {
+            background: #0056b3;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            display: flex;
+            justify-content: space-between;
+            background: #e3e3e3;
+            padding: 8px;
+            border-radius: 5px;
+            margin-top: 5px;
+        }
+        .completed {
+            text-decoration: line-through;
+            color: green;
+        }
+        .priority {
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        .high { background: red; color: white; }
+        .medium { background: orange; color: white; }
+        .low { background: green; color: white; }
+    </style>
+</body>
+</html>
